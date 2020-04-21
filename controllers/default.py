@@ -2,6 +2,7 @@
 # this file is released under public domain and you can use without limitations
 import re
 import random
+import datetime
 import urllib.parse
 from json import dumps
 from collections import OrderedDict
@@ -572,7 +573,9 @@ def sponsor_leaf_check(use_form_data, form_data_to_db):
             user_image        = user_image,
             verified_kind     = reservation_row.verified_kind,
             verified_name     = reservation_row.verified_name,
-            verified_more_info= reservation_row.verified_more_info)
+            verified_more_info= reservation_row.verified_more_info,
+            expires_on        = reservation_row.verified_time +
+                datetime.timedelta(days=reservation_row.sponsorship_expires_after_days or 0))
 
     elif status == "invalid":
         response.view = request.controller + "/spl_invalid." + request.extension
@@ -763,7 +766,9 @@ def valid_spons(form, species_name, price_pounds, partner_data):
             form.errors.user_paid = T("Please donate at least £%s to sponsor this leaf, or you could simply choose another leaf") % ("{:.2f}".format(price_pounds), )
     except:
         form.errors.user_paid = T("Please enter a valid number")
-    
+
+    form.vars.e_mail = standardize_email(form.vars.e_mail)
+        
     if form.vars.user_giftaid:
         missing_title = not (form.vars.user_donor_title or "").strip()
         if missing_title:
@@ -779,7 +784,8 @@ def valid_spons(form, species_name, price_pounds, partner_data):
     form.vars.reserve_time = form.vars.user_updated_time = request.now
     form.vars.user_sponsor_lang = (request.env.http_accept_language or '').lower()
     form.vars.asking_price = price_pounds
-    form.vars.sponsorship_duration_days=365*4+1 ## 4 Years
+    ## This is a new sponsorship, so duration and expiry are both 4 Years
+    form.vars.sponsorship_expires_after_days = form.vars.sponsorship_duration_days = 365*4+1
     form.vars.partner_name=partner_data.get('partner_identifier')
     form.vars.partner_percentage=partner_data.get('percentage')
     
@@ -811,6 +817,44 @@ def sponsor_replace_page():
         raise_incorrect_url(URL('index', scheme=True, host=True), T("Error - you gave no OTT number.") + " " + T("Go back to the home page"))
     except Exception as e:
         raise_incorrect_url(URL('index', scheme=True, host=True), str(e) + ". " + T("Go back to the home page"))
+
+
+def renew():
+    def renew_validator(form, emails):
+        if form.vars.email not in emails:
+            form.errors.email = form.errors.email or T(
+                'Sorry we have no record of that email address')
+            
+    # require both an email and an OTT - can click on the species on the tree
+    try:
+        ott = int(request.vars.get('ott'))
+        row = db(db.reservations.OTT_ID == ott).select(
+            db.reservations.name,
+            db.reservations.verified_preferred_image_src,
+            db.reservations.verified_preferred_image_src_id,
+            db.reservations.e_mail,
+            db.reservations.PP_e_mail).first()
+        if not row or (row.e_mail is None and row.PP_e_mail is None):
+            raise HTTP(400, "No sponsorship information")
+    except TypeError:
+        raise HTTP(400, "No species provided")
+    email = request.vars.get('email')
+    form = SQLFORM.factory(Field('email', requires=IS_EMAIL(), label="Email address (this could be the one you gave us, or the email address associated with your payment)"))
+    if email is None or not form.accepts(request.vars, onvalidation=lambda f: renew_validator(f, (row.e_mail, row.PP_e_mail))):
+        # custom validator here needed that gives a different error message if the email does not match.
+        response.view = request.controller + "/renew_input." + request.extension
+        return dict(form=form, row=row)
+	db.reservations.expires_on = Field.Virtual(lambda row: row.reservations.sponsorship_expires_after_days - row.item.quantity)
+    else:
+        email = standardize_email(email)
+        query = (db.reservations.e_mail == email) | (db.reservations.PP_e_mail == email)
+        rows = db(query).select(orderby="DATE_ADD(reservations.verified_time, INTERVAL reservations.sponsorship_expires_after_days DAY)")
+		data = [{'ott': r.OTT_ID, 'name': r.name, 'expires': } for r in rows]
+		get_common_names(otts)
+        return dict(rows = rows)    
+    #if row and row[0].strip == email or 
+    # & ((db.reservations.e_mail = email) | (db.reservations.PP_e_mail = email))
+
 
 # TODO enabling edits and intelligent behaviour if a logged in user goes back to their own leaf    
 
@@ -1238,6 +1282,8 @@ def pp_process_post():
             paid = float(request.vars.mc_gross)
         except:
             paid = None
+        
+
         updated = db(reservation_query &
                      #check the fields we are about to update are null (if not, this could be malicious)
                      (db.reservations.PP_first_name == None) &
@@ -1252,7 +1298,7 @@ def pp_process_post():
                              PP_second_name = request.vars.get('last_name'),
                              PP_town = ", ".join([t for t in [request.vars.get('address_city'), request.vars.get('address_state')] if t]),
                              PP_country = request.vars.get('address_country'),
-                             PP_e_mail = request.vars.get('payer_email'),
+                             PP_e_mail = standardize_email(request.vars.get('payer_email')),
                              verified_paid = paid,
                              PP_transaction_code = request.vars.get('txn_id'),
                              sale_time = request.vars.get('payment_date')
@@ -1856,3 +1902,12 @@ def safe_read(a, b='r'):
         return safe_file.read()
     finally:
         safe_file.close()
+
+def standardize_email(email_address):
+    # make the domain part of the email lowercase
+    email = email_address or ''
+    email = email.rsplit('@', 1)
+    if len(email) == 2:
+        return email[0] + '@' + email[1].lower()
+    else:
+        return email[0]

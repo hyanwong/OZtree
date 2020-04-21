@@ -28,7 +28,7 @@ $(document).ready(function() {
 #1 no sandboxing: all links open as normal. Links that are internal (i.e. use the URL helper) 
 #  should pass on the embed status (this also avoids embedding the tree viewer itself) (normal display)
 #  We would probably like to stop URLs that open in a new tab (e.g. within an A(... _target="_blank") helper
-#  from also adding embed, but this is diffcult to do, so these should be hardcoded urls instead
+#  from also adding embed, but this is difficult to do, so these should be hardcoded urls instead
 #2 minor "sandbox": all links open in a new tab (the "embed" need not be passed on to these links)
 #3 can only follow relative links without _target set (and cannot e.g. right click): embed status should be passed on (normal museum display)
 #4 cannot follow links at all (and cannot e.g. right click) 
@@ -55,10 +55,10 @@ if request.vars.embed:
       def URL(*args, **kwargs): return web2py_URL(*args, **dict(kwargs, vars=dict(kwargs.get('vars') or {}, embed=request.vars.embed)))
       #remove external A href links
       web2py_A = A
-      def A(*args, **kwargs): return web2py_A(*args, **kwargs) if '_target' not in kwargs and ('_href' not in kwargs or kwargs['_href'].startswith(".") or (kwargs['_href'].startswith("/") and not kwargs['_href'].startswith("//"))) else SPAN(*args, _style="text-decoration: underline;", **kwargs)
+      def A(*args, **kwargs): return web2py_A(*args, **kwargs) if '_target' not in kwargs and ('_href' not in kwargs or kwargs['_href'].startswith(".") or (kwargs['_href'].startswith("/") and not kwargs['_href'].startswith("//"))) else SPAN(*args, _style="text-decoration: none; color: inherit;", **kwargs)
     elif request.vars.embed=='4':
       #remove hyperlink from *all* links created via the web2py A() helper
-      def A(*args, **kwargs): return SPAN(*args, _style="text-decoration: underline;", **kwargs)
+      def A(*args, **kwargs): return SPAN(*args, _style="text-decoration: none; color: inherit", **kwargs)
     pass
   pass
 pass

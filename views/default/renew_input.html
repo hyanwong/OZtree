@@ -1,0 +1,19 @@
+{{
+    response.title='OneZoom: '+T('sponsorship renewal')
+    response.files.append(URL('static', 'css/content_pages.css'))
+}}
+{{extend ('embed.html' if 'embed' in request.vars else 'uikit_layout.html')}}
+
+{{block masthead}}
+{{if 'embed' not in request.vars:}}
+<div class="home-heading uk-text-center uk-padding-small">
+  <h1>Sponsorship renewal</h1>
+</div>
+{{pass}}
+{{end block}}
+{{if row.verified_preferred_image_src and row.verified_preferred_image_src_id:}}
+<img class="uk-align-right" style="border-radius: 20%" src="{{=thumbnail_url(row.verified_preferred_image_src, row.verified_preferred_image_src_id)}}">
+{{pass}}
+<h2>{{=T('Confirm email address')}}</h2>
+<p>{{=XML(T('If you sponsored %s, please enter your email address to view your sponsorships') % (I(row.name), ))}}</p>
+{{=form}}

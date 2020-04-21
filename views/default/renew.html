@@ -1,0 +1,22 @@
+{{
+    response.title='OneZoom: '+T('sponsorship renewal')
+    response.files.append(URL('static', 'css/content_pages.css'))
+}}
+{{extend ('embed.html' if 'embed' in request.vars else 'uikit_layout.html')}}
+
+{{block masthead}}
+{{if 'embed' not in request.vars:}}
+<div class="home-heading uk-text-center uk-padding-small">
+  <h1>Sponsorship renewal</h1>
+</div>
+{{pass}}
+{{end block}}
+<h2>Species available for renewal under the same email address</h2>
+
+
+{{for r in rows:}}
+
+{{=r.name}}
+
+{{pass}}
+

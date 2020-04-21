@@ -14,7 +14,7 @@
 {{end block}}
 
 <h2>{{=T('This leaf has been sponsored')}}</h2>
-<p>{{=XML(T('You can explore this tree of life at home or on your mobile device from %s') % (A("www.onezoom.org", _href="//www.onezoom.org", target="_blank"),))}}</p>
+<p>{{=XML(T('This sponsorship will continue until %s. If you are the sponsor, you can %s.') % (expires_on.strftime("%d %b %Y").lstrip('0'), A(T('renew this and other sponsorships on the OneZoom website'), _href=URL('default', 'renew.html', host='www.onezoom.org'))))}}</p>
 <div class="uk-grid uk-text-small uk-child-width-1-3@m">
   <div>
     <h3>{{=T('About leaf sponsorship')}}</h3>
@@ -43,7 +43,7 @@
     <h3>{{=T('There are plenty more leaves')}}</h3>
     <p> {{=T('We’re sorry if you wanted to sponsor this leaf.  There is only one name per species so get your favourite species while you can.')}}</p>
     <p>{{# Make all internal URLs absolute so they get culled when sandboxing
-       =XML(T('If you would like to sponsor something else, we’ve still got %s.') % (A(T('lots of great leaves available for sponsorship'), _href=URL('default','sponsor.html', scheme=True, host=True)),))}}</p>
+       =XML(T('If you would like to sponsor something else, simply browse the rest of the OneZoom tree. There are still %s.') % (A(T('lots of great leaves available for sponsorship'), _href=URL('default', 'sponsor.html', host='www.onezoom.org')),))}}</p>
     <p>{{=T('Thank you for your interest in supporting our work.')}}</p>
   </div>
 </div>
