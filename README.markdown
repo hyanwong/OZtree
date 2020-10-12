@@ -24,7 +24,8 @@ The OneZoom codebase uses the following software (licenses for each listed in br
 	* pymysql
 	* piexif
 	* requests
-	* Dendropy
+	* Dendropy (>= 4.0.0)
+	* indexed_bzip2 (>= 1.1.3)
 	* (for functional testing) nose + js2py + selenium +  e.g. chromedriver_installer 
 * [Perl](https://www.perl.org) with the following libraries installed
  	* File::ReadBackwards

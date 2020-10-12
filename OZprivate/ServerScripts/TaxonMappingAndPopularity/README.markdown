@@ -1,6 +1,6 @@
 Python code contained in this directory allows mapping from OpenTree identifiers to EoL, IUCN, and Wikidata identifiers.
 
-The main script is `CSV_base_table_creator.py`, which reads in a set of files, creates mappings, (optionally) analyses popularity, and outputs the mappings to a set of CSV files, which can be read in to an SQL database.
+The main script is `CSV_base_table_creator.py`, which reads in a set of files, creates mappings, (optionally) analyses popularity, and outputs the mappings to a set of CSV files, which can be read in to an SQL database. In the creation of the normal OneZoom tree, this script is called as step 5 of the [OneZoom tree building pipeline](../TreeBuild/README.markdown).
 
 At a minimum, the script requires
 

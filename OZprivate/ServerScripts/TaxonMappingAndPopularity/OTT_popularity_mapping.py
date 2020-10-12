@@ -245,12 +245,6 @@ class PartialBzip2(indexed_bzip2.IndexedBzip2File):
             self.save_block_offset_file()
         return self.offsets_filename
 
-    def size(self):
-        saved_pos = self.tell()
-        tot_bytes = self.seek( 0, io.SEEK_END )
-        self.seek(saved_pos)
-        return tot_bytes
-
     def reset(self):
         if self.start >= 0:
             self.seek(self.start)

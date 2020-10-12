@@ -87,9 +87,10 @@ If you already have your own newick tree with open tree ids on it already, and d
 	gzip < OZprivate/data/OZTreeBuild/${OZ_TREE}/${OZ_TREE}_full_tree.phy > static/FinalOutputs/${OZ_TREE}_full_tree.phy.gz
 	```
 
-	## create the base tree and table data
+	## Map identifiers and create OneZoom specific data files (compressed tree, database tables)
    
-5. (many hours) This is the long step, although it can benefit from parallel decoding of the wikimedia database dump files, so it can be worth running this on a multiprocessor machine (e.g. with 64 or even 128 cores, setting `${THREADS}` as appropriate). On the basis of the `${OZ_TREE}_full_tree.phy` file, look for ID mappings between different datasets, calculate popularity measures via wikidata/pedia, refine the tree (remove subspecies, randomly break polytomies, remove unifurcations etc), and then create corresponding database tables together with `ordered_tree_XXXXX.nwk`, `ordered_tree_XXXXX.poly` (same file but with polytomies marked with curly braces), and `ordered_tree_XXXXX.date` files (where XXXXX is the version number, usually a timestamp).
+5. (many hours) On the basis of the `${OZ_TREE}_full_tree.phy` file, look for ID mappings between different datasets, calculate popularity measures via wikidata/pedia, refine the tree (remove subspecies, randomly break polytomies, remove unifurcations etc), and then create corresponding database tables together with `ordered_tree_XXXXX.nwk`, `ordered_tree_XXXXX.poly` (same file but with polytomies marked with curly braces), and `ordered_tree_XXXXX.date` files (where XXXXX is the version number, usually a timestamp). This is the long step, although decoding the wikimedia database dump files can be parallelized, so it can be worth running this on a multiprocessor machine (e.g. with 64 or even 128 cores, setting `${THREADS}` as appropriate). The  [README file](../TaxonMappingAndPopularity/README.markdown)  in the TaxonMappingAndPopularity directory gives more details.
+
 
     Additional flags can be given to override the OpenTree taxonomy in specific cases (using `--extra_source_file`), and to exclude certain taxa (e.g. dinosaurs) from the popularity calculations.
 
